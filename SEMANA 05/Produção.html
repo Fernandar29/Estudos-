@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Portal da Cidade — Cidade do Espantalho</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root{
+      --accent:#c56a45;
+      --glass-border: rgba(255,255,255,0.06);
+      --muted:#6c6c6c;
+      --text:#222;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color:var(--text);
+      background: #000; /* fallback */
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .hero-bg {position: fixed; inset: 0; z-index: 0; overflow: hidden;}
+    .hero-bg img {width:100%; height:100%; object-fit: cover; image-rendering: pixelated; filter: saturate(.95) contrast(.98) blur(.3px); transform: scale(1.02);}
+    .hero-overlay {position: fixed; inset: 0; background: linear-gradient(rgba(8,8,8,0.06), rgba(8,8,8,0.10)); z-index:1; pointer-events:none; backdrop-filter: blur(4px) saturate(.95);}
+
+    header{position: fixed; top:0; left:0; right:0; height:76px; display:flex; align-items:center; justify-content:space-between; padding: 0 20px; z-index: 1200; background: rgba(12,12,12,0.08); backdrop-filter: blur(6px); border-bottom: 1px solid var(--glass-border);}
+    header .left {display:flex; align-items:center; gap:12px;}
+    header img.logo{height:72px; width:auto; image-rendering: pixelated; display:block;}
+    header .nav{display:flex; gap:20px; align-items:center;}
+    header .nav a{color:#fff; text-decoration:none; font-weight:600; padding:6px 10px; border-radius:8px; transition:background .15s;}
+    header .nav a:hover{ background: rgba(255,255,255,0.04) }
+
+    #btnMenu{background:none; border:0; color:#fff; font-size:22px; cursor:pointer; padding:8px; border-radius:8px; display:none;}
+
+    .sidebar {position: fixed; top:76px; left:0; width: 78%; max-width: 320px; bottom:0; z-index: 1300; background: linear-gradient(180deg, rgba(12,12,12,0.14), rgba(12,12,12,0.08)); backdrop-filter: blur(8px); transform: translateX(-110%); transition: transform .28s ease; border-right:1px solid var(--glass-border); padding:16px; overflow:auto;}
+    .sidebar.open { transform: translateX(0); }
+    .sidebar h3{ color:#fff; margin:6px 0 12px; font-size:18px;}
+    .sidebar a{display:flex; gap:10px; align-items:center; padding:10px; text-decoration:none; color:#fff; border-radius:8px; margin-bottom:6px; font-weight:600;}
+    .sidebar a:hover{ background: rgba(255,255,255,0.04) }
+
+    .mobile-overlay {position: fixed; inset: 0; z-index: 1280; background: rgba(0,0,0,0.45); opacity: 0; visibility: hidden; transition: opacity .2s;}
+    .mobile-overlay.show { opacity:1; visibility:visible; }
+
+    .main {position: relative; z-index: 5; max-width: 1000px; margin: 120px auto 60px; padding: 18px;}
+
+    .card {background: rgba(255,255,255,0.85); border-radius:12px; padding: 14px; margin-bottom: 16px; box-shadow: 0 10px 30px rgba(15,15,15,0.08); border: 1px solid var(--glass-border);}
+
+    .input-row{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+    label{ color:#444; min-width:160px; }
+    input[type=number]{ padding:8px;border-radius:8px;border:1px solid #ddd; width:120px }
+    .btn {background: linear-gradient(180deg,var(--accent), #a84b34); color:#fff; border:0; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:700; box-shadow: 0 8px 20px rgba(197,106,69,0.18);}
+
+    footer{ text-align:center; color:#fff; opacity:.9; margin-top:30px }
+
+    @media (max-width: 1024px){
+      header .nav{ display:none; }
+      #btnMenu{ display:inline-flex; }
+      .main{ margin-top: 96px; padding: 16px; }
+    }
+    @media (min-width: 1025px){
+      .sidebar{ display:none !important; }
+      .mobile-overlay{ display:none; }
+      #btnMenu{ display:none; }
+      header .nav{ display:flex; }
+      header img.logo{ height:84px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero-bg" aria-hidden="true">
+    <img src="imagens/cidade_do_espantalho.png" alt="Fundo - Cidade do Espantalho">
+  </div>
+  <div class="hero-overlay" aria-hidden="true"></div>
+
+  <header>
+    <div class="left">
+      <button id="btnMenu" aria-label="Abrir menu móvel">☰</button>
+      <img src="imagens/logo.png" alt="Cidade do Espantalho" class="logo">
+    </div>
+    <nav class="nav" aria-label="Navegação principal">
+      <a href="#atividades">Atividades</a>
+      <a href="site2.html">Relíquia</a>
+      <a href="placar.html">Placar</a>
+      <a href="pvp.html">PvP</a>
+      <a href="breve.html">Em breve...</a>
+    </nav>
+  </header>
+
+  <aside id="sidebar" class="sidebar" aria-hidden="true">
+    <h3>Menu</h3>
+    <a href="#atividades">📜 Atividades</a>
+    <a href="site2.html">💎 Relíquia</a>
+    <a href="placar.html">🏆 Placar</a>
+    <a href="pvp.html">⚔️ PvP</a>
+    <a href="breve.html">🔮 Em breve...</a>
+  </aside>
+  <div id="mobileOverlay" class="mobile-overlay" aria-hidden="true"></div>
+
+  <main class="main">
+    <section id="atividades">
+      <div class="card">
+        <h4>Herbalista Avançado</h4>
+        <div class="input-row">
+          <label for="conjuntosPorDia">Conjuntos por dia:</label>
+          <input type="number" id="conjuntosPorDia" min="1" value="5">
+        </div>
+        <button class="btn" id="startHerbalist2">Iniciar Coleta de Plantas</button>
+        <div id="herbalistResults2" style="display:none; margin-top:10px;">
+          <p id="herbalistStatus2"></p>
+          <p id="plantasNormaisCount2">Plantas normais coletadas: 0</p>
+          <p id="plantasRarasCount2">Plantas raras coletadas: 0</p>
+          <p id="plantasEspeciaisCount">Plantas especiais coletadas: 0</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4>Mineração</h4>
+        <button class="btn" id="startMining">Iniciar Mineração</button>
+        <div id="miningResults" style="display:none; margin-top:10px;">
+          <p id="miningStatus">Minerando...</p>
+          <p id="pedraCount">Pedra: 0</p>
+          <p id="ferroCount">Ferro: 0</p>
+          <p id="inutilCount">Minério inútil: 0</p>
+          <p id="finalMessage"></p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4>Lenhador</h4>
+        <div class="input-row">
+          <label for="lumberjackHours">Horas de trabalho (1-3):</label>
+          <input type="number" id="lumberjackHours" min="1" max="3" value="1">
+        </div>
+        <button class="btn" id="startLumberjack">Iniciar Corte de Árvores</button>
+        <div id="lumberjackResults" style="display:none; margin-top:10px;">
+          <p id="lumberjackStatus"></p>
+          <p id="arvoresCount">Árvores normais coletadas: 0</p>
+          <p id="troncosNormaisCount">Troncos de madeira normal: 0</p>
+          <p id="sombrosasCount">Árvores do assombro: 0</p>
+          <p id="troncosSombrososCount">Troncos do assombro: 0</p>
+          <p id="baldeSeivaCount">Baldes de seiva do assombro: 0</p>
+          <p id="meioBaldeSeivaCount">Meios baldes de seiva do assombro: 0</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4>Pescador</h4>
+        <div class="input-row">
+          <label for="fishingAttempts">Tentativas de pesca:</label>
+          <input type="number" id="fishingAttempts" min="1" value="1">
+          <label for="fishingChance">Chance de sucesso (%):</label>
+          <input type="number" id="fishingChance" min="0" max="100" value="50">
+        </div>
+        <button class="btn" id="startFishing">Iniciar Pesca</button>
+        <div id="fishermanResults" style="display:none; margin-top:10px;">
+          <p id="fishermanStatus"></p>
+          <p id="peixesCount">Peixes pescados: 0</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4>Mineração Avançada</h4>
+        <div class="input-row">
+          <label for="miningAttempts2">Escavações:</label>
+          <input type="number" id="miningAttempts2" min="1" value="1">
+          <label for="magicoChance">Minério Mágico (%):</label>
+          <input type="number" id="magicoChance" min="0" max="100" value="50">
+          <label for="ruimChance">Ruim (%):</label>
+          <input type="number" id="ruimChance" min="0" max="100" value="50">
+        </div>
+        <button class="btn" id="startMining2">Iniciar Mineração Avançada</button>
+        <div id="miningResults2" style="display:none; margin-top:10px;">
+          <p id="miningStatus2"></p>
+          <p id="magicoCount">Minério mágico: 0</p>
+          <p id="ruimCount">Minério ruim: 0</p>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <footer style="position:relative; z-index:5;">
+    <p style="color:#fff; opacity:.85">&copy; 2025 Cidade do Espantalho — Todos os direitos reservados.</p>
+  </footer>
+
+  <script>
+    const btnMenu = document.getElementById('btnMenu');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('mobileOverlay');
+    btnMenu && btnMenu.addEventListener('click', () => {sidebar.classList.toggle('open'); overlay.classList.toggle('show');});
+    overlay && overlay.addEventListener('click', () => {sidebar.classList.remove('open'); overlay.classList.remove('show');});
+    document.querySelectorAll('.sidebar a').forEach(a=>{a.addEventListener('click', ()=> { sidebar.classList.remove('open'); overlay.classList.remove('show'); });});
+
+    // HERBALISTA
+    document.getElementById('startHerbalist2').addEventListener('click', startHerbalist2);
+    function startHerbalist2(){
+      const input = document.getElementById('conjuntosPorDia');
+      let conjuntosPorDia = parseInt(input.value);
+      if (isNaN(conjuntosPorDia) || conjuntosPorDia < 1) { alert('Insira um número válido.'); return; }
+      let plantasNormais=0, plantasRaras=0, plantasEspeciais=0, i=0;
+      const herbalistResults2 = document.getElementById('herbalistResults2');
+      const herbalistStatus2 = document.getElementById('herbalistStatus2');
+      herbalistResults2.style.display = 'block';
+      function collectPlant(){
+        if (i < conjuntosPorDia) {
+          const chance = Math.random();
+          if (chance < 0.05) { plantasEspeciais++; herbalistStatus2.textContent = `Conjunto ${i+1}: 🌟 Planta ESPECIAL coletada!`; }
+          else if (chance < 0.15) { plantasRaras++; herbalistStatus2.textContent = `Conjunto ${i+1}: 🌸 Planta RARA coletada!`; }
+          else { plantasNormais++; herbalistStatus2.textContent = `Conjunto ${i+1}: 🌱 Planta normal coletada.`; }
+          document.getElementById('plantasNormaisCount2').textContent = `Plantas normais coletadas: ${plantasNormais}`;
+          document.getElementById('plantasRarasCount2').textContent = `Plantas raras coletadas: ${plantasRaras}`;
+          document.getElementById('plantasEspeciaisCount').textContent = `Plantas especiais coletadas: ${plantasEspeciais}`;
+          i++; setTimeout(collectPlant, 900);
+        } else { herbalistStatus2.textContent = '🌿 Resumo do dia 🌿'; }
+      }
+      collectPlant();
+    }
+
+    // MINING SIMPLES
+    document.getElementById('startMining').addEventListener('click', startMining);
+    function startMining(){
+      const golpesPorPedra = 6, tempoTrabalho = 60, golpesPorMinuto = 12;
+      const pedraPorHora = Math.floor((tempoTrabalho * golpesPorMinuto) / golpesPorPedra);
+      const semMinerio = 0.30, chanceFerro = 0.40, necessario = 50;
+      let pedra=0, ferroColetado=0, minerioInutil=0, i=0;
+      document.getElementById('miningResults').style.display='block';
+      function step(){
+        if (i < pedraPorHora){
+          if (Math.random() > semMinerio){
+            if (Math.random() < chanceFerro){ ferroColetado++; document.getElementById('ferroCount').textContent = `Ferro: ${ferroColetado}`;}
+            else { minerioInutil++; document.getElementById('inutilCount').textContent = `Minério inútil: ${minerioInutil}`;}
+          } else { pedra++; document.getElementById('pedraCount').textContent = `Pedra: ${pedra}`; }
+          i++; setTimeout(step, 200);
+        } else {
+          document.getElementById('miningStatus').textContent = 'Mineração concluída!';
+        }
+      }
+      step();
+    }
+
+    // LENHADOR ATUALIZADO
+    document.getElementById('startLumberjack').addEventListener('click', startLumberjack);
+    function startLumberjack(){
+      let horas = parseInt(document.getElementById('lumberjackHours').value);
+      if (isNaN(horas)|| horas<1 || horas>3){ alert('Insira 1 a 3 horas'); return; }
+
+      let arvores=0, troncosNormais=0;
+      let arvoresSombrosas=0, troncosSombrosos=0;
+      let baldesSeiva=0, meiosBaldesSeiva=0;
+      let hora=0;
+
+      document.getElementById('lumberjackResults').style.display='block';
+
+      function cutTree(){
+        if (hora < horas){
+          const sorte = Math.random();
+          if (sorte < 0.15){
+            arvoresSombrosas++; baldesSeiva++;
+            document.getElementById('lumberjackStatus').textContent=`Hora ${hora+1}: 🌲🌑 Árvore do Assombro encontrada!`;
+          }
+          else if (sorte < 0.30){
+            troncosSombrosos++; meiosBaldesSeiva++;
+            document.getElementById('lumberjackStatus').textContent=`Hora ${hora+1}: 🌳 Tronco do Assombro obtido.`;
+          }
+          else if (sorte < 0.65){
+            arvores++; document.getElementById('lumberjackStatus').textContent=`Hora ${hora+1}: 🌲 Árvore normal coletada.`;
+          }
+          else {
+            troncosNormais++; document.getElementById('lumberjackStatus').textContent=`Hora ${hora+1}: 🌳 Tronco de madeira normal coletado.`;
+          }
+
+          document.getElementById('arvoresCount').textContent=`Árvores normais coletadas: ${arvores}`;
+          document.getElementById('troncosNormaisCount').textContent=`Troncos de madeira normal: ${troncosNormais}`;
+          document.getElementById('sombrosasCount').textContent=`Árvores do assombro: ${arvoresSombrosas}`;
+          document.getElementById('troncosSombrososCount').textContent=`Troncos do assombro: ${troncosSombrosos}`;
+          document.getElementById('baldeSeivaCount').textContent=`Baldes de seiva do assombro: ${baldesSeiva}`;
+          document.getElementById('meioBaldeSeivaCount').textContent=`Meios baldes de seiva do assombro: ${meiosBaldesSeiva}`;
+
+          hora++; setTimeout(cutTree, 1000);
+        } else {
+          document.getElementById('lumberjackStatus').textContent='🌳 Trabalho do Lenhador concluído!';
+        }
+      }
+      cutTree();
+    }
+
+    // PESCA
+    document.getElementById('startFishing').addEventListener('click', startFishing);
+    function startFishing(){
+      let tentativas = parseInt(document.getElementById('fishingAttempts').value);
+      let chanceSucesso = parseInt(document.getElementById('fishingChance').value);
+      if (isNaN(tentativas)||tentativas<1){ alert('Insira um número válido'); return;}
+      if (isNaN(chanceSucesso)||chanceSucesso<0||chanceSucesso>100){ alert('Chance inválida'); return;}
+      let peixes=0, i=0;
+      document.getElementById('fishermanResults').style.display='block';
+      function pesca(){
+        if (i<tentativas){
+          if (Math.random()*100 < chanceSucesso){ peixes++; document.getElementById('fishermanStatus').textContent=`Tentativa ${i+1}: 🎣 Sucesso!`; }
+          else{ document.getElementById('fishermanStatus').textContent=`Tentativa ${i+1}: ❌ Nada fisgado.`; }
+          document.getElementById('peixesCount').textContent=`Peixes pescados: ${peixes}`;
+          i++; setTimeout(pesca,800);
+        } else {
+          document.getElementById('fishermanStatus').textContent='🎣 Pesca finalizada!';
+        }
+      }
+      pesca();
+    }
+
+    // MINERAÇÃO AVANÇADA (SEM FERRO)
+    document.getElementById('startMining2').addEventListener('click', startMining2);
+    function startMining2(){
+      let tentativas = parseInt(document.getElementById('miningAttempts2').value);
+      let chanceMagico = parseInt(document.getElementById('magicoChance').value);
+      let chanceRuim = parseInt(document.getElementById('ruimChance').value);
+      if (isNaN(tentativas)||tentativas<1){ alert('Número inválido'); return;}
+      let magico=0, ruim=0, i=0;
+      document.getElementById('miningResults2').style.display='block';
+      function escava(){
+        if (i<tentativas){
+          let rand = Math.random()*100;
+          if (rand < chanceMagico){ magico++; document.getElementById('miningStatus2').textContent=`Escavação ${i+1}: ✨ Minério Mágico!`; }
+          else if (rand < chanceMagico+chanceRuim){ ruim++; document.getElementById('miningStatus2').textContent=`Escavação ${i+1}: 💩 Minério Ruim.`; }
+          else{ document.getElementById('miningStatus2').textContent=`Escavação ${i+1}: Nada encontrado.`; }
+          document.getElementById('magicoCount').textContent=`Minério mágico: ${magico}`;
+          document.getElementById('ruimCount').textContent=`Minério ruim: ${ruim}`;
+          i++; setTimeout(escava,800);
+        } else {
+          document.getElementById('miningStatus2').textContent='⛏️ Mineração Avançada concluída!';
+        }
+      }
+      escava();
+    }
+  </script>
+</body>
+</html>
